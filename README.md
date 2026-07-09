@@ -11,12 +11,19 @@ Each agent has a single focused responsibility and passes its findings forward t
 ## 🚀 Key Highlights
 
 - 🤖 **Multi-Agent Orchestration** using **LangGraph** (8 sequential nodes)
+  
 - 🧠 **AI Code Understanding & Refactoring** using **Groq LLaMA** (via LangChain-Groq)
+  
 - 🔍 **Rule-Based Static Analysis** for bugs, security, performance and style (regex/pattern-based)
+  
 - 🧬 **Semantic Pattern Matching** via **ChromaDB** + `all-MiniLM-L6-v2` sentence embeddings
+  
 - 📁 **Multi-Source Input** — paste code, upload files, or point at a GitHub repo URL
+  
 - 📄 **Downloadable PDF Reports** generated with **ReportLab**
+  
 - 🖥️ **Interactive Web UI** built with **Streamlit**
+  
 - 🚀 **REST API Backend** built with **FastAPI**
 
 ---
@@ -24,12 +31,19 @@ Each agent has a single focused responsibility and passes its findings forward t
 ## ⭐ Key Features
 
 - **Multi-Source Code Ingestion** — analyze code pasted directly into the UI, uploaded files (`.py`, `.java`, `.js`, `.cpp`, `.go`, `.rs`, `.txt`), or an entire public GitHub repository (shallow-cloned on demand)
+  
 - **Static Analysis Engine** — dedicated detectors for bugs (e.g. division-by-zero, infinite loops), security issues (hardcoded credentials, SQL/command injection, weak crypto, unsafe deserialization), performance issues (nested loops, inefficient iteration), and style issues (line length, magic numbers, missing docstrings)
+  
 - **AI-Assisted Understanding** — a Groq-backed LLM node summarizes what a code snippet does, estimates complexity, and states its purpose (for snippets under a length threshold)
+  
 - **AI-Assisted Refactoring** — a second LLM node proposes refactored code and explanations based on the issues found by the static analyzers
+  
 - **Vector Similarity Search** — ChromaDB compares submitted code against a seeded set of known vulnerable/inefficient patterns to surface related issues and fixes
+  
 - **Consolidated Multi-File Reporting** — when reviewing a GitHub repo or multiple uploaded files, results are deduplicated and merged into one overall quality report
+  
 - **Quality Scoring** — computes an overall score plus a readability / security / performance / maintainability / documentation breakdown
+  
 - **Scalable Architecture** — modular agent design makes it easy to add new agents (e.g. a Dependency Agent or Complexity Agent)
 
 ---
@@ -65,23 +79,37 @@ Each agent receives and enriches the shared LangGraph state, with a single, cons
 ### 🧩 Code Understanding Agent — Groq LLaMA
 Sends the submitted code (up to ~2000 characters) to the LLM with a prompt asking for a one-to-two sentence summary, a complexity rating (Low/Medium/High), and the code's main purpose. Skipped automatically for longer snippets or when no API key is configured, in which case this section of the report is left empty.
 
+---
+
 ### 🐛 Bug Detection Agent — Regex Static Analysis
 Scans line-by-line for patterns such as potential division-by-zero and `while True` / `while 1` loops with no detectable `break` within the following lines, flagging them as critical/high severity bugs.
+
+---
 
 ### 🔒 Security Analysis Agent — Regex Static Analysis
 Matches lines against known-risk patterns: hardcoded credentials, string-concatenated SQL queries, `os.system`/`subprocess`/`eval`/`exec` calls, weak hashing algorithms (MD5/SHA1/DES), and `pickle` usage — each mapped to a severity level and a remediation tip.
 
+---
+
 ### ⚡ Performance Analysis Agent — Regex Static Analysis
 Flags deeply nested loops (via a simple lookahead count of `for` keywords) and `range(len(...))` usage as an opportunity to use `enumerate()`.
+
+---
 
 ### 🎨 Style Analysis Agent — Regex Static Analysis
 Flags lines over 100 characters, likely "magic numbers," and functions/classes missing a docstring on the line immediately following their definition.
 
+---
+
 ### 🧬 Similar Patterns Agent — ChromaDB + Sentence-Transformers
 Embeds the submitted code with `all-MiniLM-L6-v2` and queries a persistent ChromaDB collection seeded with common vulnerable/inefficient code patterns (hardcoded secrets, SQL injection, command injection, `eval`, inefficient loops), returning the closest matches with their known issue and fix.
 
+---
+
 ### 🔄 Refactoring Agent — Groq LLaMA
 Feeds all bugs/security/performance/style findings (up to 10) plus the original code (up to ~1500 characters) to the LLM, requesting refactored code, explanations and improvements as JSON. Falls back to a templated bullet-point summary if the LLM is unavailable, the code is too long, or the JSON response can't be parsed.
+
+---
 
 ### 📄 Report Generation Agent — Scoring + ReportLab
 Aggregates all findings into a quality score and a five-category breakdown (readability, security, performance, maintainability, documentation), then hands the consolidated report off to `ReportGenerator` to render a downloadable PDF via **ReportLab**.
