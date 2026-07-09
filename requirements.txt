@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+streamlit
+langchain
+langchain-groq
+langgraph
+chromadb
+tree-sitter
+reportlab
+python-multipart
+python-dotenv
+pydantic
+httpx
+aiofiles
+pandas
+sentence-transformers
